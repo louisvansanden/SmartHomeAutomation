@@ -13,6 +13,8 @@ const char* mqtt_server = MY_IP;
 #define A 12
 #define B 14
 #define C 4
+#define T 13  // pin D7
+
 
 boolean useClockA = false;
 int dayA;
@@ -31,6 +33,12 @@ int dayC;
 int hoursC;
 int minutesC;
 int secondsC;
+
+boolean useTimer = false;
+//int dayT;
+int hoursT;
+int minutesT;
+//int secondsT;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -189,6 +197,35 @@ void callback(char* topic, byte* payload, unsigned int length) {
       }
       break;
 
+      case 'T':                                         // T0----   or    T1hhmm
+      if ((char)payload[1] == '0'){
+        digitalWrite(T, LOW);
+        useTimer = false;
+        
+      } else if ((char)payload[1] == '1'){
+
+        useTimer = true;
+        
+//        dayT = timeClient.getDay();
+//        dayT %= 7;
+        
+        hoursT = ((String)(char)payload[2] + (String)(char)payload[3]).toInt();
+//        dayT += hoursT / 24;
+//        hoursT %= 24;
+        
+        minutesT = ((String)(char)payload[4] + (String)(char)payload[5]).toInt();
+//        hoursT += minutesT / 60;
+//        minutesT %= 60;
+
+//        secondsT = timeClient.getSeconds() + 10;
+//        secondsT %= 60;
+
+        Serial.print("Timer set: ");
+        Serial.print(hoursT); Serial.print(":"); Serial.print(minutesT); Serial.println();
+        
+      }
+      break;
+
   }
 }
 
@@ -249,7 +286,33 @@ void clockCheckLoop() {
         toggleDatabase("ESP001-C");
       }
   }
+
+  if (useTimer) {
+      if (currentHour == hoursT and currentMinute == minutesT) {
+        Serial.println("BEEP BEEP");
+        beep(75);
+        useTimer = false;
+      }
+  }
   
+}
+
+void beep(int del) {
+  digitalWrite(T, HIGH);
+  delay(del);
+  digitalWrite(T, LOW);
+  delay(del);
+  digitalWrite(T, HIGH);
+  delay(del);
+  digitalWrite(T, LOW);
+  delay(del);
+  digitalWrite(T, HIGH);
+  delay(del);
+  digitalWrite(T, LOW);
+  delay(del);
+  digitalWrite(T, HIGH);
+  delay(del+50);
+  digitalWrite(T, LOW);
 }
 
 void toggleDatabase(String DEVICE_ID) {
@@ -300,6 +363,7 @@ void toggleDatabase(String DEVICE_ID) {
 // ------------------------------------------------------------------------------------------------------------------------------------------------ SETUP
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);
+  pinMode(T, OUTPUT);
   digitalWrite(BUILTIN_LED, LOW);     
   pinMode(A, OUTPUT);
   pinMode(B, OUTPUT);
@@ -310,6 +374,7 @@ void setup() {
   client.setCallback(callback);
   timeClient.begin();
   digitalWrite(BUILTIN_LED, HIGH);
+  beep(75);
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ LOOP

@@ -18,7 +18,7 @@ function toggle(id) {
       }
     }
   };
-  xmlhttp.open("GET", "database/toggleState.php?id=" + id, true);
+  xmlhttp.open("GET", "/database/toggleState.php?id=" + id, true);
   xmlhttp.send();
 }
 
@@ -40,7 +40,7 @@ function showDevices() {
       document.getElementById("btn-holder").innerHTML = this.response;
     }
   };
-  xmlhttp.open("GET", "database/getAllDevices.php", true);
+  xmlhttp.open("GET", "/database/getAllDevices.php", true);
   xmlhttp.send();
 }
 
@@ -65,7 +65,7 @@ function renameDevice() {
   };
   xmlhttp.open(
     "GET",
-    "database/renameDevice.php?id=" + $id + "&name=" + $name,
+    "/database/renameDevice.php?id=" + $id + "&name=" + $name,
     true
   );
   xmlhttp.send();
@@ -86,7 +86,7 @@ function setTimer(id) {
     };
     xmlhttp.open(
       "GET",
-      "database/toggleState.php?id=" +
+      "/database/toggleState.php?id=" +
         id +
         "&timer=1&xxxx=" +
         document.getElementById("time" + id).value,
